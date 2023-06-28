@@ -7,8 +7,42 @@ use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
     public function index()
     {
         return view('home');
+    }
+
+    public function top()
+    {
+        // ログインユーザーを取得する
+        $user = Auth::user();
+
+        // ログインユーザーに紐づくフォルダを一つ取得する
+        $folder = $user->folders()->first();
+
+        // まだ一つもフォルダを作っていなければホームページをレスポンスする
+        if (is_null($folder)) {
+            return view('top');
+        }
+
+        // フォルダがあればそのフォルダのタスク一覧にリダイレクトする
+        return redirect()->route('tasks.index', [
+            'id' => $folder->id,
+        ]);
     }
 }
